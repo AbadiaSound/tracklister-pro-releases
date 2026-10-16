@@ -1,6 +1,5 @@
 # Va en el repositorio tracklister-pro-releases, en la ruta .github/workflows/informe-semanal.yml
 # Cada lunes envía a Telegram el número de descargas del instalador.
-# Las claves se guardan en GitHub: Settings → Secrets and variables → Actions.
 name: Informe semanal de descargas
 
 on:
@@ -18,11 +17,11 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           REPO: ${{ github.repository }}
         run: |
-          DESCARGAS=$(curl -s "https://api.github.com/repos/$REPO/releases" | jq '[.[].assets[].download_count] | add // 0')
+          curl -s "https://api.github.com/repos/$REPO/releases" -o releases.json
+          DESCARGAS=$(python3 -c "import json; r=json.load(open('releases.json')); print(sum(a.get('download_count',0) for x in r for a in x.get('assets',[])))")
+          echo "Descargas: $DESCARGAS"
           TEXTO="📦 Informe semanal Tracklister PRO
           Descargas totales del instalador: $DESCARGAS"
           curl -s "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
             --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
             --data-urlencode "text=${TEXTO}"
-
-            
