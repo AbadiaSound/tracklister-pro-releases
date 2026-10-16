@@ -20,8 +20,11 @@ jobs:
           curl -s "https://api.github.com/repos/$REPO/releases" -o releases.json
           DESCARGAS=$(python3 -c "import json; r=json.load(open('releases.json')); print(sum(a.get('download_count',0) for x in r for a in x.get('assets',[])))")
           echo "Descargas: $DESCARGAS"
+          TOKEN=$(echo "$TELEGRAM_BOT_TOKEN" | tr -d '[:space:]')
+          CHAT=$(echo "$TELEGRAM_CHAT_ID" | tr -d '[:space:]')
           TEXTO="📦 Informe semanal Tracklister PRO
           Descargas totales del instalador: $DESCARGAS"
-          curl -s "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
-            --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
-            --data-urlencode "text=${TEXTO}"
+          RESPUESTA=$(curl -s "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=${CHAT}" \
+            --data-urlencode "text=${TEXTO}")
+          echo "Respuesta de Telegram: $RESPUESTA"
